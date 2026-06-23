@@ -18,7 +18,6 @@ def home():
 
 @app.route("/search", methods=["POST"])
 def search():
-
     data = request.get_json()
 
     print("REQUEST DATA:", data)
@@ -42,11 +41,9 @@ def search():
 
     print("ANSWER:", answer)
 
-    return jsonify(
-        {
-            "answer": answer
-        }
-    )
+    return jsonify({
+        "answer": answer
+    })
 
 
 if __name__ == "__main__":
