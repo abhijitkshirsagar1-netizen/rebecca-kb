@@ -19,13 +19,13 @@ def home():
 @app.route("/search", methods=["POST"])
 def search():
 
-data = request.get_json()
+    data = request.get_json()
 
-print("REQUEST DATA:", data)
+    print("REQUEST DATA:", data)
 
-question = data.get("question", "")
+    question = data.get("question", "")
 
-print("QUESTION:", question)
+    print("QUESTION:", question)
 
     response = client.responses.create(
         model="gpt-4.1-mini",
@@ -38,9 +38,15 @@ print("QUESTION:", question)
         ]
     )
 
-    return jsonify({
-        "answer": response.output_text
-    })
+    answer = response.output_text
+
+    print("ANSWER:", answer)
+
+    return jsonify(
+        {
+            "answer": answer
+        }
+    )
 
 
 if __name__ == "__main__":
