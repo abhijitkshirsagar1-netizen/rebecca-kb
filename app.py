@@ -18,19 +18,20 @@ def home():
 
 @app.route("/search", methods=["POST"])
 def search():
-data = request.get_json()
 
-print("REQUEST DATA:", data)
+    data = request.get_json()
 
-question = (
-    data.get("message", {})
-        .get("toolCalls", [{}])[0]
-        .get("function", {})
-        .get("arguments", {})
-        .get("question", "")
-)
+    print("REQUEST DATA:", data)
 
-print("QUESTION:", question)
+    question = (
+        data.get("message", {})
+            .get("toolCalls", [{}])[0]
+            .get("function", {})
+            .get("arguments", {})
+            .get("question", "")
+    )
+
+    print("QUESTION:", question)
 
     response = client.responses.create(
         model="gpt-4.1-mini",
@@ -47,9 +48,11 @@ print("QUESTION:", question)
 
     print("ANSWER:", answer)
 
-    return jsonify({
-        "answer": answer
-    })
+    return jsonify(
+        {
+            "answer": answer
+        }
+    )
 
 
 if __name__ == "__main__":
