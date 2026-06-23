@@ -34,15 +34,21 @@ def search():
     print("QUESTION:", question)
 
     response = client.responses.create(
-        model="gpt-4.1-mini",
-        input=question,
-        tools=[
-            {
-                "type": "file_search",
-                "vector_store_ids": [VECTOR_STORE_ID]
-            }
-        ]
-    )
+    model="gpt-4.1-mini",
+    instructions="""
+Answer only from DAK IT HUB documents.
+Be concise.
+Never say you don't have information if the documents contain the answer.
+""",
+    input=question,
+    tools=[
+        {
+            "type":"file_search",
+            "vector_store_ids":[VECTOR_STORE_ID]
+        }
+    ],
+    max_output_tokens=150
+)
 
     answer = response.output_text
 
