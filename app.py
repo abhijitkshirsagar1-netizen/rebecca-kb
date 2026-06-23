@@ -19,8 +19,13 @@ def home():
 @app.route("/search", methods=["POST"])
 def search():
 
-    data = request.json
-    question = data.get("question", "")
+data = request.get_json()
+
+print("REQUEST DATA:", data)
+
+question = data.get("question", "")
+
+print("QUESTION:", question)
 
     response = client.responses.create(
         model="gpt-4.1-mini",
