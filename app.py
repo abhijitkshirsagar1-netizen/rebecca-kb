@@ -4,10 +4,12 @@ import os
 
 app = Flask(__name__)
 
+# OpenAI client
 client = OpenAI(
     api_key=os.environ["OPENAI_API_KEY"]
 )
 
+# Vector Store ID
 VECTOR_STORE_ID = os.environ["VECTOR_STORE_ID"]
 
 
@@ -19,14 +21,18 @@ def home():
 @app.route("/search", methods=["POST"])
 def search():
 
+    # Get JSON request
     data = request.get_json()
 
+    # Debug logs
     print("REQUEST DATA:", data)
 
+    # Extract question from Vapi
     question = data.get("question", "")
 
     print("QUESTION:", question)
 
+    # Handle empty question
     if not question:
         return jsonify({
             "answer": "Could you please clarify your question?"
@@ -40,35 +46,46 @@ def search():
             instructions="""
 You are Rebecca from DAK IT HUB.
 
-Search the DAK IT HUB documents for the most relevant information.
+Search the DAK IT HUB documents semantically.
 
-Single keywords are sufficient.
+Infer intent and meaning, not just exact words.
 
 Examples:
 
-attendees → Webinar FAQ
+attendance, turnout, show rates, people showing up
+→ webinar attendees
 
-appointment setting → Appointment FAQ
+calendar, meetings, scheduling, appointment setting
+→ appointment support
 
-pricing → Pricing FAQ
+rejects, bad leads, sales pushback, lead quality issues
+→ replacement policy
 
-clients → Company Overview
+commercials, pricing, cost, CPL, engagement model
+→ pricing model
 
-case studies → Case Studies
+logos, references, IBM, Google, customers
+→ clients and case studies
 
-replacement → Replacement Policy
+quality, validation, verification, double check
+→ lead quality
 
-quality → Lead Quality
+pilot, trial, proof of concept, POC
+→ pilot programs
 
-content syndication → Content Syndication
+Chinese, Japanese, Korean, multilingual
+→ language support
 
-SQL → SQL Programs
+SQL, BANT, MQL, HQL
+→ lead qualification programs
 
-BANT → BANT Programs
+webinar, registrations, audience acquisition
+→ webinar programs
 
-Do not require full questions.
+content, whitepaper, downloads, syndication
+→ content syndication
 
-Answer using only information contained in the documents.
+Answer only from the DAK IT HUB documents.
 
 Keep answers conversational and concise.
 
@@ -80,7 +97,7 @@ Never sound like a brochure.
 
 Never invent facts.
 
-If information is unavailable, suggest that a team member can follow up.
+If information is unavailable, politely suggest that a team member can follow up with additional details.
 """,
 
             input=question,
@@ -97,6 +114,7 @@ If information is unavailable, suggest that a team member can follow up.
 
         answer = response.output_text
 
+        # Debug logs
         print("ANSWER:", answer)
 
     except Exception as e:
