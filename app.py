@@ -4,12 +4,10 @@ import os
 
 app = Flask(__name__)
 
-# OpenAI client
 client = OpenAI(
     api_key=os.environ["OPENAI_API_KEY"]
 )
 
-# Vector Store ID
 VECTOR_STORE_ID = os.environ["VECTOR_STORE_ID"]
 
 
@@ -21,18 +19,14 @@ def home():
 @app.route("/search", methods=["POST"])
 def search():
 
-    # Get JSON request
     data = request.get_json()
 
-    # Debug logs
     print("REQUEST DATA:", data)
 
-    # Extract question from Vapi
     question = data.get("question", "")
 
     print("QUESTION:", question)
 
-    # Handle empty question
     if not question:
         return jsonify({
             "answer": "Could you please clarify your question?"
@@ -46,9 +40,37 @@ def search():
             instructions="""
 You are Rebecca from DAK IT HUB.
 
-Answer questions using only the information contained in the DAK IT HUB documents.
+Search the DAK IT HUB documents for the most relevant information.
 
-Keep answers conversational, professional and concise.
+Single keywords are sufficient.
+
+Examples:
+
+attendees → Webinar FAQ
+
+appointment setting → Appointment FAQ
+
+pricing → Pricing FAQ
+
+clients → Company Overview
+
+case studies → Case Studies
+
+replacement → Replacement Policy
+
+quality → Lead Quality
+
+content syndication → Content Syndication
+
+SQL → SQL Programs
+
+BANT → BANT Programs
+
+Do not require full questions.
+
+Answer using only information contained in the documents.
+
+Keep answers conversational and concise.
 
 Default to one or two sentences.
 
@@ -58,7 +80,7 @@ Never sound like a brochure.
 
 Never invent facts.
 
-If information is unavailable, politely suggest that a team member can follow up with additional details.
+If information is unavailable, suggest that a team member can follow up.
 """,
 
             input=question,
@@ -75,7 +97,6 @@ If information is unavailable, politely suggest that a team member can follow up
 
         answer = response.output_text
 
-        # Debug logs
         print("ANSWER:", answer)
 
     except Exception as e:
