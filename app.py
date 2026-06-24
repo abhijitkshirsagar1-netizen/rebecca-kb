@@ -23,42 +23,68 @@ def search():
 
     print("REQUEST DATA:", data)
 
-    question = (
-        data.get("message", {})
-            .get("toolCalls", [{}])[0]
+    tool_calls = data.get("message", {}).get("toolCalls", [])
+
+    question = ""
+
+    if tool_calls:
+        question = (
+            tool_calls[0]
             .get("function", {})
             .get("arguments", {})
             .get("question", "")
-    )
+        )
 
     print("QUESTION:", question)
 
-    response = client.responses.create(
-    model="gpt-4.1-mini",
-    instructions="""
-Answer only from DAK IT HUB documents.
-Be concise.
-Never say you don't have information if the documents contain the answer.
-""",
-    input=question,
-    tools=[
-        {
-            "type":"file_search",
-            "vector_store_ids":[VECTOR_STORE_ID]
-        }
-    ],
-    max_output_tokens=150
-)
+    if not question:
+        return jsonify({
+            "results": "Could you please clarify your question?"
+        })
 
-    answer = response.output_text
+    try:
+
+        response = client.responses.create(
+            model="gpt-4.1-mini",
+            instructions="""
+You are Rebecca from DAK IT HUB.
+
+Answer questions using only the information contained in the DAK IT HUB documents.
+
+Keep answers conversational and concise.
+
+Default to one or two sentences.
+
+Never invent facts.
+
+If information is unavailable, politely suggest that a team member can follow up.
+""",
+            input=question,
+            tools=[
+                {
+                    "type": "file_search",
+                    "vector_store_ids": [VECTOR_STORE_ID]
+                }
+            ],
+            max_output_tokens=300
+        )
+
+        answer = response.output_text
+
+    except Exception as e:
+
+        print(e)
+
+        answer = (
+            "I'm sorry, I couldn't retrieve that information right now. "
+            "A team member can follow up with additional details."
+        )
 
     print("ANSWER:", answer)
 
-    return jsonify(
-        {
-            "answer": answer
-        }
-    )
+    return jsonify({
+        "results": answer
+    })
 
 
 if __name__ == "__main__":
