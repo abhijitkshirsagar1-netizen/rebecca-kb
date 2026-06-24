@@ -24,6 +24,7 @@ def search():
     # Get JSON request
     data = request.get_json()
 
+    # Debug logs
     print("REQUEST DATA:", data)
 
     # Extract question from Vapi
@@ -45,7 +46,7 @@ def search():
             instructions="""
 You are Rebecca from DAK IT HUB.
 
-Answer questions using only the information available in the DAK IT HUB documents.
+Answer questions using only the information contained in the DAK IT HUB documents.
 
 Keep answers conversational, professional and concise.
 
@@ -74,6 +75,9 @@ If information is unavailable, politely suggest that a team member can follow up
 
         answer = response.output_text
 
+        # Debug logs
+        print("ANSWER:", answer)
+
     except Exception as e:
 
         print("ERROR:", str(e))
@@ -82,8 +86,6 @@ If information is unavailable, politely suggest that a team member can follow up
             "I'm sorry, I couldn't retrieve that information right now. "
             "A team member can follow up with additional details."
         )
-
-    print("ANSWER:", answer)
 
     return jsonify({
         "answer": answer
