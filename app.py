@@ -4,10 +4,12 @@ import os
 
 app = Flask(__name__)
 
+# OpenAI client
 client = OpenAI(
     api_key=os.environ["OPENAI_API_KEY"]
 )
 
+# Vector Store ID
 VECTOR_STORE_ID = os.environ["VECTOR_STORE_ID"]
 
 
@@ -19,53 +21,54 @@ def home():
 @app.route("/search", methods=["POST"])
 def search():
 
+    # Get JSON request
     data = request.get_json()
 
     print("REQUEST DATA:", data)
 
-    tool_calls = data.get("message", {}).get("toolCalls", [])
-
-    question = ""
-
-    if tool_calls:
-        question = (
-            tool_calls[0]
-            .get("function", {})
-            .get("arguments", {})
-            .get("question", "")
-        )
+    # Extract question from Vapi
+    question = data.get("question", "")
 
     print("QUESTION:", question)
 
+    # Handle empty question
     if not question:
         return jsonify({
-            "results": "Could you please clarify your question?"
+            "answer": "Could you please clarify your question?"
         })
 
     try:
 
         response = client.responses.create(
             model="gpt-4.1-mini",
+
             instructions="""
 You are Rebecca from DAK IT HUB.
 
-Answer questions using only the information contained in the DAK IT HUB documents.
+Answer questions using only the information available in the DAK IT HUB documents.
 
-Keep answers conversational and concise.
+Keep answers conversational, professional and concise.
 
 Default to one or two sentences.
 
+Never read long lists.
+
+Never sound like a brochure.
+
 Never invent facts.
 
-If information is unavailable, politely suggest that a team member can follow up.
+If information is unavailable, politely suggest that a team member can follow up with additional details.
 """,
+
             input=question,
+
             tools=[
                 {
                     "type": "file_search",
                     "vector_store_ids": [VECTOR_STORE_ID]
                 }
             ],
+
             max_output_tokens=300
         )
 
@@ -73,7 +76,7 @@ If information is unavailable, politely suggest that a team member can follow up
 
     except Exception as e:
 
-        print(e)
+        print("ERROR:", str(e))
 
         answer = (
             "I'm sorry, I couldn't retrieve that information right now. "
@@ -83,7 +86,7 @@ If information is unavailable, politely suggest that a team member can follow up
     print("ANSWER:", answer)
 
     return jsonify({
-        "results": answer
+        "answer": answer
     })
 
 
